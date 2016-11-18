@@ -25,6 +25,15 @@ unbound_private_address:
     - "fd00::/8"
     - "fe80::/10"
 
+unbound_conf_list:
+    - 01general.conf
+    - 99forward_zone.conf
+## if zones
+#    - 10{{ zone.name }}.conf
+## disable these two lines if not enabling blackhole
+    - 80blackhole_zone.conf
+    - 80local-blocking-data.conf
+
 unbound_domains: {}
 
 unbound_domains_with_reverses: []
@@ -54,4 +63,33 @@ unbound_service_state: started
 
 # Service enabled on startup: yes or no
 unbound_service_enabled: yes
+
+# enable extra security and chroot (debian only)
+unbound_security: false
+
+unbound_blackhole: true
+unbound_sinkhole_ipv4: '10.0.6.66'
+#unbound_sinkhole_ipv4: '127.0.0.1'
+unbound_sinkhole_ipv6: '::1'
+unbound_blackhole_tld:
+  - science
+  - top
+  - gdn
+  - download
+  - accountant
+  - trade
+  - biz
+  - bid
+  - link
+  - zip
+  - review
+  - country
+  - kim
+  - cricket
+  - work
+  - party
+  - gq
+
+#scriptsdir: /usr/local/bin
+scriptsdir: /usr/local/scripts
 

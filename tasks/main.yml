@@ -1,12 +1,7 @@
 ---
-- name: install unbound for Debian OS family
-  apt: pkg=unbound state={{ unbound_pkg_state }}
-  when: ansible_os_family == 'Debian' and unbound_only_zones == false
-  tags: ["packages","unbound"]
-
-- name: install unbound for RedHat OS family
-  yum: name=unbound state={{ unbound_pkg_state }}
-  when: ansible_os_family == 'RedHat' and unbound_only_zones == false
+- name: install unbound
+  package: pkg=unbound state={{ unbound_pkg_state }}
+  when: unbound_only_zones == false
   tags: ["packages","unbound"]
 
 - name: Ensure zones folder exist
@@ -20,10 +15,10 @@
   tags: ["configuration","unbound"]
 
 - name: configure add independant config file
-  template: 
+  template:
      src={{item}}.j2
      dest="/etc/unbound/conf.d/{{item}}"
-  with_items: 
+  with_items:
      - 01general.conf
      - 99forward_zone.conf
   notify: restart unbound
@@ -31,32 +26,56 @@
   tags: ["configuration","unbound"]
 
 - name: configure unbound zones
-  template: 
+  template:
      src=10zone.conf.j2
      dest="/etc/unbound/conf.d/10{{item.name}}.conf"
-  with_items: unbound_zones
+  with_items: "{{ unbound_zones }}"
   notify: restart unbound
   tags: ["configuration","unbound"]
 
-- name: retreive unbound conf file list
-  shell: /bin/ls /etc/unbound/conf.d/
-  register: unbound_conf_list
-  always_run: true
-  tags: ["configuration","unbound"]
+- include: blackhole.yml
+  when: unbound_blackhole is defined and unbound_blackhole
 
 - name: configure unbound.conf to include all configuration
-  template: 
+  template:
      src=unbound.conf.j2
      dest=/etc/unbound/unbound.conf
      validate="/usr/sbin/unbound-checkconf %s"
   notify: restart unbound
   tags: ["configuration","unbound"]
+  when: not unbound_security == true
+- name: configure unbound.conf to include all configuration (chroot/can't validate)
+  template:
+     src=unbound.conf.j2
+     dest=/etc/unbound/unbound.conf
+  notify: restart unbound
+  tags: ["configuration","unbound"]
+  when: unbound_security == true
 
+- name: check root.key status
+  stat: path=/var/lib/unbound/root.key
+  register: rootkey
+- name: ensure we have valid root.key
+  command: "unbound-anchor"
+  when: not rootkey.stat.exists or rootkey.stat.size == 0
+
+- include: debian-chroot.yml
+  when: unbound_security == true and (ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu')
+
+- debug: var=unbound_service_enabled
 - name: ensure unbound is started/stopped
-  service: 
+  service:
      name=unbound
      state={{ unbound_service_state }}
      enabled={{ unbound_service_enabled }}
-     pattern="unbound"
+## [WARNING]: Ignoring "pattern" as it is not used in "systemd"
+#     pattern="unbound"
   tags: ["service","unbound"]
+
+- name: Redhat | Update NetworkManager DNS config
+  lineinfile: "dest=/etc/sysconfig/network-scripts/ifcfg-{{ ansible_default_ipv4.interface }} regexp=^DNS1=127.0.0.1 line=DNS1=127.0.0.1 backup=yes"
+  when: ansible_os_family == "RedHat" or ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
+- name: Redhat | Update current resolv.conf
+  lineinfile: "dest=/etc/resolv.conf regexp=^nameserver line='nameserver 127.0.0.1' backup=yes"
+  when: ansible_os_family == "RedHat" or ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
 

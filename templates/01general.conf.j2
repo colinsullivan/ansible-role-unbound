@@ -1,8 +1,11 @@
 # {{ ansible_managed }}
 
+server:
 {% for config in unbound_configuration %}
     {{ config.keys().0 }}: {{ config.values().0 }}
 {% endfor %}
+    # The following line will configure unbound to perform cryptographic
+    # DNSSEC validation using the root trust anchor.
     auto-trust-anchor-file: "/var/lib/unbound/root.key"
 {% for interface in unbound_interfaces %}
     interface: {{interface}}
@@ -13,7 +16,46 @@
 
     hide-identity: yes
     hide-version: yes
+    num-threads: 4
+    cache-min-ttl: 30
+
+    ## tuning from https://calomel.org/unbound_dns.html
+    ##		   http://unbound.net/documentation/howto_optimise.html
+    # outgoing-range: 4096
+    outgoing-range: 32768
+    # so-rcvbuf: 0
+    so-rcvbuf: 32m
+    # msg-cache-size: 4m
+    msg-cache-size: 256m
+    num-queries-per-thread: 4096
+    # rrset-cache-size: 4m
+    rrset-cache-size: 256m
+    # infra-cache-numhosts: 10000
+    infra-cache-numhosts: 100000
 
 {% for private_address in unbound_private_address %}
     private-address: {{private_address}}
 {% endfor %}
+
+{% if ansible_distribution == 'Ubuntu' %}
+## dnssec bug on ubuntu
+## https://bugs.launchpad.net/ubuntu/+source/unbound/+bug/988513
+## https://www.unbound.net/documentation/howto_turnoff_dnssec.html
+## time can also be an issue: https://miceliux.com/blog/2013/01/14/fix-failed-to-prime-trust-anchor-dnsskey-rrset-is-not-secure-dnsskey-in/
+## OR? https://github.com/jedisct1/dnscrypt-proxy/issues/161
+#    val-permissive-mode: yes
+{% endif %}
+
+{% if unbound_security is defined and unbound_security %}
+    chroot: /var/lib/unbound
+    harden-glue: yes
+    harden-short-bufsize: no
+    harden-large-queries: no
+    harden-dnssec-stripped:yes
+#    rate-limit: 1000
+    logfile: "/var/lib/unbound/var/log/unbound.log"
+{% else %}
+## no chroot
+    chroot: ""
+
+{% endif %}

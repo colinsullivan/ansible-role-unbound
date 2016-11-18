@@ -96,3 +96,13 @@ unbound_local_zone_type:
     reversed.example.com: "static"
 
 ```
+
+## FAQ
+
+* If manipulating/blackholing entries, pay attention to cache while testing.
+You might need to flush it like
+```
+$ unbound-control flush_zone www.google.com
+```
+Fully restarting unbound flushes unbound too.
+

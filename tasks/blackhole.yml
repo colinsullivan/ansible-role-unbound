@@ -1,0 +1,51 @@
+---
+
+## Note: script used below is using local-data command to redirect to another IP
+##	alternative option is inform_deny eg 'local-zone: "google.com" inform_deny.'
+## https://github.com/Aracktus/DNS-Unbound-Blocklist-Downloader
+## https://github.com/aabed/DNSblacklist
+## http://www.shellguardians.com/2016/08/building-dns-sinkhole-in-freebsd-with.html
+## https://cyprio.net/wtf/2014-06-22-unbound-catch-all.html
+
+
+- name: Ensure script directory exists
+  file: "dest={{ item }} mode=0755 state=directory"
+  with_items:
+    - "{{ scriptsdir }}"
+
+- name: check if script exists
+  stat: path="{{ scriptsdir }}/dns-unbound-blocklist-downloader.py"
+  register: havescript
+- name: download domains feed script
+  get_url:
+    url: https://github.com/juju4/DNS-Unbound-Blocklist-Downloader/raw/master/dns-unbound-blocklist-downloader.py
+    dest: "{{ scriptsdir }}/dns-unbound-blocklist-downloader.py"
+    checksum: sha256:7c0eefd4cff195310870692bd148f3822c0d172ee6c2c6d67696f5127457a40f
+    mode: 0755
+  when: not havescript.stat.exists
+
+- name: update blackhole script configuration
+  replace:
+    dest: "{{ scriptsdir }}/dns-unbound-blocklist-downloader.py"
+    regexp: "{{ item.re }}"
+    replace: "{{ item.rep }}"
+    backup: yes
+  with_items:
+    - { re: "^location = '/etc/unbound/'", rep: "location = '/etc/unbound/conf.d/'" }
+    - { re: "^filename = 'local-blocking-data.conf'", rep: "filename = '80local-blocking-data.conf'" }
+    - { re: "^IPV4_ADDR = '.*'", rep: "IPV4_ADDR = '{{ unbound_sinkhole_ipv4 }}'" }
+    - { re: "^IPV6_ADDR = '.*'", rep: "IPV6_ADDR = '{{ unbound_sinkhole_ipv6 }}'" }
+
+- name: run blackhole feed script first time
+  command: "python {{ scriptsdir }}/dns-unbound-blocklist-downloader.py creates=/etc/unbound/conf.d/80local-blocking-data.conf"
+  notify: restart unbound
+
+- name: add update feed cron task
+  cron: name="unbound blackhole update" minute=35 hour=3
+    user="root" job="{{ scriptsdir }}/dns-unbound-blocklist-downloader.py -r > /tmp/dns-unbound-blocklist-downloader.out 2>&1"
+    cron_file=ansible_unbound-blackhole-update
+
+- name: add blackholing of known bad TLDs
+  template: src=80blackhole_zone.conf.j2 dest=/etc/unbound/conf.d/80blackhole_zone.conf mode=0644
+  notify: restart unbound
+

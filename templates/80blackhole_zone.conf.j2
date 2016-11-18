@@ -1,0 +1,15 @@
+# {{ ansible_managed }}
+
+## blackholing some of the new gTLD
+# Bad TLDs
+#	https://www.spamhaus.org/statistics/tlds/
+#	https://www.bluecoat.com/company/press-releases/blue-coat-reveals-webs-shadiest-neighborhoods
+
+{% if unbound_blackhole_tld is defined and unbound_blackhole_tld != [] %}
+server:
+{% for tld in unbound_blackhole_tld %}
+     local-zone: "{{ tld }}." redirect
+     local-data: "{{ tld }}. 10800 IN A {{ unbound_sinkhole_ipv4 }}"
+     local-data: "{{ tld }}. 10800 IN AAAA {{ unbound_sinkhole_ipv6 }}"
+{% endfor %}
+{% endif %}

@@ -1,5 +1,7 @@
 # {{ ansible_managed }}
 
+do-not-query-localhost: no
+
 {% if unbound_forward_zone_active %}
     forward-zone:
         name: "."

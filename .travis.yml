@@ -1,4 +1,5 @@
 ---
+## Reminder: Travis test only valid on Ubuntu12.04, 14.04 in testing, Centos through docker (leave it to kitchen...)
 language: python
 python: "2.7"
 before_install:
@@ -6,7 +7,24 @@ before_install:
  - sudo apt-get install -qq python-apt python-pycurl
 install:
   - pip install ansible
+  - ansible --version
+  - "{ echo '[defaults]'; echo 'roles_path = ../'; } >> ansible.cfg"
 script:
-  - echo localhost > inventory
-  - ansible-playbook -i inventory --syntax-check --list-tasks role.yml
-  - ansible-playbook -i inventory --connection=local --sudo -vvvv role.yml
+  - "echo \"[test-kitchen]\nlocalhost\" > inventory"
+
+# Check the role/playbook's syntax.
+  - "ansible-playbook -i inventory --syntax-check test/integration/default/default.yml"
+
+# Run the role/playbook with ansible-playbook.
+  - "ansible-playbook -i inventory --connection=local --sudo -vvvv test/integration/default/default.yml"
+
+# Run the role/playbook again, checking to make sure it's idempotent.
+  - "ansible-playbook -i inventory test/integration/default/default.yml --connection=local --sudo  | grep -q 'changed=0.*failed=0'  && (echo 'Idempotence test: pass' && exit 0)  || (echo 'Idempotence test: fail' && exit 1)"
+#  - >
+#  ansible-playbook -i inventory test/integration/default/default.yml --connection=local --sudo
+#  | grep -q 'changed=0.*failed=0'
+#  && (echo 'Idempotence test: pass' && exit 0)
+#  || (echo 'Idempotence test: fail' && exit 1)
+
+# Request a page via the web server, to make sure it's running and responds.
+#  - "curl http://localhost/"

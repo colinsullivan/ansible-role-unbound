@@ -1,7 +1,9 @@
 ---
 - name: restart unbound
   service: name=unbound state=restarted
+  when: unbound_service_enabled == 'yes' or unbound_service_enabled == true
 
 - name: reload unbound
   service: name=unbound state=reloaded
+  when: unbound_service_enabled == 'yes' or unbound_service_enabled == true
 
