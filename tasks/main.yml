@@ -33,6 +33,13 @@
   notify: restart unbound
   tags: ["configuration","unbound"]
 
+- name: check root.key status
+  stat: path=/var/lib/unbound/root.key
+  register: rootkey
+- name: ensure we have valid root.key
+  command: "unbound-anchor"
+  when: not rootkey.stat.exists or rootkey.stat.size == 0
+
 - include: blackhole.yml
   when: unbound_blackhole is defined and unbound_blackhole
 
@@ -51,13 +58,6 @@
   notify: restart unbound
   tags: ["configuration","unbound"]
   when: unbound_security == true
-
-- name: check root.key status
-  stat: path=/var/lib/unbound/root.key
-  register: rootkey
-- name: ensure we have valid root.key
-  command: "unbound-anchor"
-  when: not rootkey.stat.exists or rootkey.stat.size == 0
 
 - include: debian-chroot.yml
   when: unbound_security == true and (ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu')
