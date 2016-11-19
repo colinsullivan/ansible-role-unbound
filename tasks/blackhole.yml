@@ -20,7 +20,7 @@
   get_url:
     url: https://github.com/juju4/DNS-Unbound-Blocklist-Downloader/raw/master/dns-unbound-blocklist-downloader.py
     dest: "{{ scriptsdir }}/dns-unbound-blocklist-downloader.py"
-    checksum: sha256:7c0eefd4cff195310870692bd148f3822c0d172ee6c2c6d67696f5127457a40f
+    checksum: sha256:94bdc430830e1b291fa54b4c795b2c8bf4c9c3e393c06a9e9012e97433ff0d03
     mode: 0755
   when: not havescript.stat.exists
 
