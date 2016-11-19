@@ -37,7 +37,7 @@
   stat: path=/var/lib/unbound/root.key
   register: rootkey
 - name: ensure we have valid root.key
-  command: "unbound-anchor"
+  command: "unbound-anchor -v -a /var/lib/unbound/root.key"
   ignore_errors: true
   when: not rootkey.stat.exists or rootkey.stat.size == 0
 
@@ -75,7 +75,7 @@
 
 - name: Redhat | Update NetworkManager DNS config
   lineinfile: "dest=/etc/sysconfig/network-scripts/ifcfg-{{ ansible_default_ipv4.interface }} regexp=^DNS1=127.0.0.1 line=DNS1=127.0.0.1 backup=yes"
-  when: ansible_os_family == "RedHat" or ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
+  when: (ansible_os_family == "RedHat" or ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux') and ansible_default_ipv4 is defined and ansible_default_ipv4 != ''
 - name: Redhat | Update current resolv.conf
   lineinfile: "dest=/etc/resolv.conf regexp=^nameserver line='nameserver 127.0.0.1' backup=yes"
   when: ansible_os_family == "RedHat" or ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
