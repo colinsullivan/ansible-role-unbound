@@ -40,6 +40,9 @@
   command: "python {{ scriptsdir }}/dns-unbound-blocklist-downloader.py creates=/etc/unbound/conf.d/80local-blocking-data.conf"
   notify: restart unbound
 
+- name: redhat | ensure crontab is present
+  package: name=crontabs state=present
+  when: ansible_os_family == "RedHat" or ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
 - name: add update feed cron task
   cron: name="unbound blackhole update" minute=35 hour=3
     user="root" job="{{ scriptsdir }}/dns-unbound-blocklist-downloader.py -r > /tmp/dns-unbound-blocklist-downloader.out 2>&1"

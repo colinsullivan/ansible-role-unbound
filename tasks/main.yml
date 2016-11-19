@@ -38,6 +38,7 @@
   register: rootkey
 - name: ensure we have valid root.key
   command: "unbound-anchor"
+  ignore_errors: true
   when: not rootkey.stat.exists or rootkey.stat.size == 0
 
 - include: blackhole.yml
