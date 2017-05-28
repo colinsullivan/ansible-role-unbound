@@ -8,19 +8,20 @@ env:
 #    init: /sbin/init
 #    run_opts: ""
 ## FIXME! module error https://travis-ci.org/juju4/ansible-role-unbound/jobs/177210249#L2258
-#  - distribution: centos
-#    version: 7
-#    init: /usr/lib/systemd/systemd
-#    run_opts: "--privileged --volume=/sys/fs/cgroup:/sys/fs/cgroup:ro"
+  - distribution: centos
+    version: 7
+    init: /usr/lib/systemd/systemd
+    run_opts: "--privileged --volume=/sys/fs/cgroup:/sys/fs/cgroup:ro"
   - distribution: ubuntu
     version: 16.04
     init: /lib/systemd/systemd
     run_opts: "--privileged --volume=/sys/fs/cgroup:/sys/fs/cgroup:ro"
 #    run_opts: "--cap-add SYS_ADMIN"
-  - distribution: ubuntu
-    version: 14.04
-    init: /sbin/init
-    run_opts: ""
+## FIXME! travis+trusty stalling
+#  - distribution: ubuntu
+#    version: 14.04
+#    init: /sbin/init
+#    run_opts: ""
 #  - distribution: ubuntu
 #    version: 12.04
 #    init: /sbin/init
@@ -29,9 +30,10 @@ env:
 #    version: 3.4
 #    init: /sbin/init
 #    run_opts: ""
-#  - distro: debian8
-#    init: /lib/systemd/systemd
-#    run_opts: "--privileged --volume=/sys/fs/cgroup:/sys/fs/cgroup:ro"
+  - distro: debian
+    version: 8
+    init: /lib/systemd/systemd
+    run_opts: "--privileged --volume=/sys/fs/cgroup:/sys/fs/cgroup:ro"
 
 services:
   - docker
