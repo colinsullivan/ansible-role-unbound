@@ -30,7 +30,7 @@ env:
 #    version: 3.4
 #    init: /sbin/init
 #    run_opts: ""
-  - distro: debian
+  - distribution: debian
     version: 8
     init: /lib/systemd/systemd
     run_opts: "--privileged --volume=/sys/fs/cgroup:/sys/fs/cgroup:ro"
