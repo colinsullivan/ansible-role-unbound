@@ -108,3 +108,16 @@ $ unbound-control flush_zone www.google.com
 ```
 Fully restarting unbound flushes unbound too.
 
+* kitchen/lxd test on centos7 failed
+```
+$ kitchen verify
+-----> Verifying <default-centos-7>...
+       Preparing files for transfer
+-----> Installing Busser (busser)
+       ERROR:  Could not find a valid gem 'busser' (>= 0), here is why:
+          Unable to download data from https://rubygems.org/ - no such name (https://rubygems.org/specs.4.8.gz)
+       sudo: /tmp/verifier/bin/busser: command not found
+       Installing Busser plugins: busser-bats busser-serverspec
+       sudo: /tmp/verifier/bin/busser: command not found
+```
+It seems to happens only on first execution, second is fine.
