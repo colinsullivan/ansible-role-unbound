@@ -58,6 +58,7 @@
     src: 80blackhole_zone.conf.j2
     dest: /etc/unbound/conf.d/80blackhole_zone.conf
     mode: '0644'
-    validate: "/usr/sbin/unbound-checkconf %s"
+# ubuntu: unbound-checkconf[606:0] fatal error: config file /root/.ansible/tmp/ansible-tmp-1517775769.73-134719702140074/source is not inside chroot /etc/unbound
+#    validate: "/usr/sbin/unbound-checkconf %s"
   notify: restart unbound
 
