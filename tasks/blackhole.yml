@@ -20,7 +20,7 @@
   get_url:
     url: https://github.com/juju4/DNS-Unbound-Blocklist-Downloader/raw/master/dns-unbound-blocklist-downloader.py
     dest: "{{ scriptsdir }}/dns-unbound-blocklist-downloader.py"
-    checksum: sha256:94bdc430830e1b291fa54b4c795b2c8bf4c9c3e393c06a9e9012e97433ff0d03
+    checksum: sha256:21ea0eeb03c3f902757f1c51323aab29e599dfde0d7d4e75b4b19ee4e3cae275
     mode: 0755
   when: not havescript.stat.exists
 
@@ -54,6 +54,10 @@
     cron_file=ansible_unbound-blackhole-update
 
 - name: add blackholing of known bad TLDs
-  template: src=80blackhole_zone.conf.j2 dest=/etc/unbound/conf.d/80blackhole_zone.conf mode=0644
+  template:
+    src: 80blackhole_zone.conf.j2
+    dest: /etc/unbound/conf.d/80blackhole_zone.conf
+    mode: '0644'
+    validate: "/usr/sbin/unbound-checkconf %s"
   notify: restart unbound
 
