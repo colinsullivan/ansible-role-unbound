@@ -76,6 +76,12 @@ script:
 ## travis/docker: Errno::EROFS: Read-only file system @ dir_s_mkdir - /etc/ansible/roles/jdauphant.unbound/test/integration/default/serverspec/.bundle
 #  - 'sudo docker exec --tty "$(cat ${container_id})" /etc/ansible/roles/jdauphant.unbound/test/integration/default/serverspec/run-local-tests.sh'
 
+after_failure:
+  - sudo docker exec "$(cat ${container_id})" cat /etc/unbound/conf.d/80local-blocking-data.conf
+  - 'docker exec --tty "$(cat ${container_id})" env TERM=xterm systemctl -l --no-pager status unbound.service'
+  - 'docker exec --tty "$(cat ${container_id})" env TERM=xterm journalctl -xe --no-pager'
+
+after_script:
   # Clean up
   - 'sudo docker stop "$(cat ${container_id})"'
 
