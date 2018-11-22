@@ -72,6 +72,7 @@
 ## [WARNING]: Ignoring "pattern" as it is not used in "systemd"
 #     pattern="unbound"
   tags: ["service","unbound"]
+  when: not (ansible_virtualization_type is defined and ansible_virtualization_type == "docker")
 
 - name: Redhat | Update NetworkManager DNS config
   lineinfile: "dest=/etc/sysconfig/network-scripts/ifcfg-{{ ansible_default_ipv4.interface }} regexp=^DNS1=127.0.0.1 line=DNS1=127.0.0.1 backup=yes"
