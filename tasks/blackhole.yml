@@ -37,7 +37,9 @@
     - { re: "^IPV6_ADDR = '.*'", rep: "IPV6_ADDR = '{{ unbound_sinkhole_ipv6 }}'" }
 
 - name: run blackhole feed script first time
-  command: "python {{ scriptsdir }}/dns-unbound-blocklist-downloader.py creates=/etc/unbound/conf.d/80local-blocking-data.conf"
+  command: "python {{ scriptsdir }}/dns-unbound-blocklist-downloader.py"
+  args:
+    creates: /etc/unbound/conf.d/80local-blocking-data.conf
   notify: restart unbound
 
 - name: debian | ensure crontab is present
@@ -58,7 +60,7 @@
     src: 80blackhole_zone.conf.j2
     dest: /etc/unbound/conf.d/80blackhole_zone.conf
     mode: '0644'
-# ubuntu: unbound-checkconf[606:0] fatal error: config file /root/.ansible/tmp/ansible-tmp-1517775769.73-134719702140074/source is not inside chroot /etc/unbound
+# ubuntu: unbound-checkconf[606:0] fatal error: config file /root/.ansible/tmp/ansible-tmp-xxx/source
+#        is not inside chroot /etc/unbound
 #    validate: "/usr/sbin/unbound-checkconf %s"
   notify: restart unbound
-

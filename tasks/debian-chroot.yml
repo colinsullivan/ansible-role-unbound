@@ -2,15 +2,27 @@
 
 ## chrooting
 ## https://fak3r.com/2012/03/14/howto-run-a-secure-caching-dns-server-in-chroot/
-- replace: "dest=/etc/default/unbound regexp='^#DAEMON_OPTS=\"-c /etc/unbound/unbound.conf\"' replace='DAEMON_OPTS=\"-c /var/lib/unbound/etc/unbound/unbound.conf\"' backup=yes"
+- name: update unbound config for chroot
+  replace:
+    dest: /etc/default/unbound
+    regexp: '^#DAEMON_OPTS=\"-c /etc/unbound/unbound.conf\"'
+    replace: 'DAEMON_OPTS=\"-c /var/lib/unbound/etc/unbound/unbound.conf\"'
+    backup: yes
 
-- replace: "dest=/etc/init.d/unbound regexp='{{ item.regexp }}' replace='{{ item.replace }}' backup=yes"
+- name: update unbound init.d script for chroot
+  replace: "dest=/etc/init.d/unbound regexp='{{ item.regexp }}' replace='{{ item.replace }}' backup=yes"
   with_items:
-    - { regexp: "^UNBOUND_CONF=/etc/unbound/unbound.conf", replace: "UNBOUND_CONF=/var/lib/unbound/etc/unbound/unbound.conf" }
+    - { regexp: "^UNBOUND_CONF=/etc/unbound/unbound.conf",
+        replace: "UNBOUND_CONF=/var/lib/unbound/etc/unbound/unbound.conf"
+      }
 ## this is improperly set before config path is given, not compatible with chroot used
-    - { regexp: '^test -x ${DAEMON}-checkconf \|\| exit 0', replace: '#test -x ${DAEMON}-checkconf $UNBOUND_CONF || exit 0' }
+    - { regexp: '^test -x ${DAEMON}-checkconf \|\| exit 0',
+        replace: '#test -x ${DAEMON}-checkconf $UNBOUND_CONF || exit 0'
+      }
 ## make checkconf script fails w just extra front /
-    - { regexp: "unbound-checkconf $CHROOT_DIR/$UNBOUND_CONF -o interface", replace: "unbound-checkconf $UNBOUND_CONF -o interface" }
+    - { regexp: "unbound-checkconf $CHROOT_DIR/$UNBOUND_CONF -o interface",
+        replace: "unbound-checkconf $UNBOUND_CONF -o interface"
+      }
 
 - name: Creates unbound chroot directory
   file: path={{ item }} state=directory owner=unbound group=root mode=0755
@@ -19,9 +31,11 @@
     - /var/lib/unbound/var/run
     - /var/lib/unbound/var/log
 
-- stat: path=/var/lib/unbound/etc/unbound
+- name: Check if /var/lib/unbound/etc/unbound exists
+  stat: path=/var/lib/unbound/etc/unbound
   register: st1
-- command: mv /etc/unbound /var/lib/unbound/etc/
+- name: move /etc/unbound to chroot directory
+  command: mv /etc/unbound /var/lib/unbound/etc/
   when: not st1.stat.exists
 - stat: path=/etc/unbound
   register: st2
@@ -32,4 +46,3 @@
 - file: src=/var/lib/unbound/var/run/unbound.pid dest=/var/run/unbound.pid owner=root group=root state=link force=yes
   when: st3.stat.islnk is not defined
   notify: restart unbound
-

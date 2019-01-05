@@ -1,4 +1,5 @@
 ---
+
 - name: install unbound
   package: pkg=unbound state={{ unbound_pkg_state }}
   when: unbound_only_zones == false
@@ -10,14 +11,14 @@
   tags: ["configuration","unbound"]
 
 - name: Ensure log file exist
-  file: path={{unbound_logfile}} state=touch mode=755 owner=unbound
+  file: path={{ unbound_logfile }} state=touch mode=755 owner=unbound
   notify: restart unbound
   tags: ["configuration","unbound"]
 
 - name: configure add independant config file
   template:
-     src={{item}}.j2
-     dest="/etc/unbound/conf.d/{{item}}"
+     src: "{{ item }}.j2"
+     dest: "/etc/unbound/conf.d/{{ item }}"
   with_items:
      - 01general.conf
      - 99forward_zone.conf
@@ -28,7 +29,7 @@
 - name: configure unbound zones
   template:
      src=10zone.conf.j2
-     dest="/etc/unbound/conf.d/10{{item.name}}.conf"
+     dest="/etc/unbound/conf.d/10{{ item.name }}.conf"
   with_items: "{{ unbound_zones }}"
   notify: restart unbound
   tags: ["configuration","unbound"]
@@ -75,10 +76,15 @@
   when: not (ansible_virtualization_type is defined and ansible_virtualization_type == "docker")
 
 - name: Redhat | Update NetworkManager DNS config
-  lineinfile: "dest=/etc/sysconfig/network-scripts/ifcfg-{{ ansible_default_ipv4.interface }} regexp=^DNS1=127.0.0.1 line=DNS1=127.0.0.1 backup=yes"
-  when: (ansible_os_family == "RedHat" or ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux') and ansible_default_ipv4 is defined and ansible_default_ipv4 != ''
+  lineinfile:
+    dest: /etc/sysconfig/network-scripts/ifcfg-{{ ansible_default_ipv4.interface }}
+    regexp: ^DNS1=.*
+    line: DNS1=127.0.0.1
+    backup: yes
+  when: ansible_os_family == "RedHat" and ansible_default_ipv4 is defined and ansible_default_ipv4
 
 - name: Redhat | Update current resolv.conf
   lineinfile: "dest=/etc/resolv.conf regexp=^nameserver line='nameserver 127.0.0.1' backup=yes"
-  when: ansible_os_family == "RedHat" and not (ansible_virtualization_type is defined and ansible_virtualization_type == "docker")
-
+  when: >
+    ansible_os_family == "RedHat" and
+    not (ansible_virtualization_type is defined and ansible_virtualization_type == "docker")
