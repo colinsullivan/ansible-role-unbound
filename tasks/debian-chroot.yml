@@ -37,12 +37,16 @@
 - name: move /etc/unbound to chroot directory
   command: mv /etc/unbound /var/lib/unbound/etc/
   when: not st1.stat.exists
-- stat: path=/etc/unbound
+- name: Check if /etc/unbound exists
+  stat: path=/etc/unbound
   register: st2
-- stat: path=/var/run/unbound.pid
+- name: Check if /var/run/unbound.pid exists
+  stat: path=/var/run/unbound.pid
   register: st3
-- file: src=/var/lib/unbound/etc/unbound dest=/etc/unbound owner=root group=root state=link
+- name: Add symlink from chroot to normal location - etc
+  file: src=/var/lib/unbound/etc/unbound dest=/etc/unbound owner=root group=root state=link
   when: st2.stat.islnk is not defined
-- file: src=/var/lib/unbound/var/run/unbound.pid dest=/var/run/unbound.pid owner=root group=root state=link force=yes
+- name: Add symlink from chroot to normal location - pid
+  file: src=/var/lib/unbound/var/run/unbound.pid dest=/var/run/unbound.pid owner=root group=root state=link force=yes
   when: st3.stat.islnk is not defined
   notify: restart unbound
