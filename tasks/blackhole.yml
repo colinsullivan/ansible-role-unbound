@@ -1,16 +1,17 @@
 ---
 
 ## Note: script used below is using local-data command to redirect to another IP
-##	alternative option is inform_deny eg 'local-zone: "google.com" inform_deny.'
+## alternative option is inform_deny eg 'local-zone: "google.com" inform_deny.'
 ## https://github.com/Aracktus/DNS-Unbound-Blocklist-Downloader
 ## https://github.com/aabed/DNSblacklist
 ## http://www.shellguardians.com/2016/08/building-dns-sinkhole-in-freebsd-with.html
 ## https://cyprio.net/wtf/2014-06-22-unbound-catch-all.html
 
 - name: Ensure script directory exists
-  file: "dest={{ item }} mode=0755 state=directory"
-  with_items:
-    - "{{ scriptsdir }}"
+  file:
+    dest: "{{ scriptsdir }}"
+    mode: '0755'
+    state: directory
 
 - name: check if script exists
   stat: path="{{ scriptsdir }}/dns-unbound-blocklist-downloader.py"
@@ -45,10 +46,14 @@
 - name: debian | ensure crontab is present
   package: name=cron state=present
   when: ansible_os_family == "Debian"
+  register: pkg_result
+  until: pkg_result is success
 
 - name: redhat | ensure crontab is present
   package: name=crontabs state=present
   when: ansible_os_family == "RedHat"
+  register: pkg_result
+  until: pkg_result is success
 
 - name: add update feed cron task
   cron:
@@ -64,7 +69,7 @@
     src: 80blackhole_zone.conf.j2
     dest: /etc/unbound/conf.d/80blackhole_zone.conf
     mode: '0644'
-# ubuntu: unbound-checkconf[606:0] fatal error: config file /root/.ansible/tmp/ansible-tmp-1517775769.73-134719702140074/source is not inside chroot /etc/unbound
+# ubuntu: unbound-checkconf[606:0] fatal error: config file /root/.ansible/tmp/ansible-tmp-xxx/source
+#        is not inside chroot /etc/unbound
 #    validate: "/usr/sbin/unbound-checkconf %s"
   notify: restart unbound
-

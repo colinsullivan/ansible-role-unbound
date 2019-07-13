@@ -1,6 +1,7 @@
 ---
 galaxy_info:
   author: "DAUPHANT Julien"
+  description: Unbound DNS Server and resolver
   license: BSD
   min_ansible_version: 1.4
   platforms:
@@ -20,7 +21,7 @@ galaxy_info:
       - raring
       - saucy
       - trusty
-  categories:
+  galaxy_tags:
    - networking
    - system
 dependencies: []
