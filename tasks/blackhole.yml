@@ -7,7 +7,6 @@
 ## http://www.shellguardians.com/2016/08/building-dns-sinkhole-in-freebsd-with.html
 ## https://cyprio.net/wtf/2014-06-22-unbound-catch-all.html
 
-
 - name: Ensure script directory exists
   file: "dest={{ item }} mode=0755 state=directory"
   with_items:
@@ -37,7 +36,10 @@
     - { re: "^IPV6_ADDR = '.*'", rep: "IPV6_ADDR = '{{ unbound_sinkhole_ipv6 }}'" }
 
 - name: run blackhole feed script first time
-  command: "python {{ scriptsdir }}/dns-unbound-blocklist-downloader.py creates=/etc/unbound/conf.d/80local-blocking-data.conf"
+  command: >
+    python {{ scriptsdir }}/dns-unbound-blocklist-downloader.py
+  args:
+    creates: /etc/unbound/conf.d/80local-blocking-data.conf
   notify: restart unbound
 
 - name: debian | ensure crontab is present
@@ -49,9 +51,13 @@
   when: ansible_os_family == "RedHat"
 
 - name: add update feed cron task
-  cron: name="unbound blackhole update" minute=35 hour=3
-    user="root" job="{{ scriptsdir }}/dns-unbound-blocklist-downloader.py -r > /tmp/dns-unbound-blocklist-downloader.out 2>&1"
-    cron_file=ansible_unbound-blackhole-update
+  cron:
+    name: "unbound blackhole update"
+    minute: '35'
+    hour: '3'
+    user: "root"
+    job: "{{ scriptsdir }}/dns-unbound-blocklist-downloader.py -r > /tmp/dns-unbound-blocklist-downloader.out 2>&1"
+    cron_file: ansible_unbound-blackhole-update
 
 - name: add blackholing of known bad TLDs
   template:

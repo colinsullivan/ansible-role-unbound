@@ -2,9 +2,15 @@
 
 ## chrooting
 ## https://fak3r.com/2012/03/14/howto-run-a-secure-caching-dns-server-in-chroot/
-- replace: "dest=/etc/default/unbound regexp='^#DAEMON_OPTS=\"-c /etc/unbound/unbound.conf\"' replace='DAEMON_OPTS=\"-c /var/lib/unbound/etc/unbound/unbound.conf\"' backup=yes"
+- name: Ensure Debian /etc/default unbound config includes chroot
+  replace:
+    dest: /etc/default/unbound
+    regexp: '^#DAEMON_OPTS=\"-c /etc/unbound/unbound.conf\"'
+    replace: 'DAEMON_OPTS=\"-c /var/lib/unbound/etc/unbound/unbound.conf\"'
+    backup: yes
 
-- replace: "dest=/etc/init.d/unbound regexp='{{ item.regexp }}' replace='{{ item.replace }}' backup=yes"
+- name: Ensure Debian unbound config includes chroot
+  replace: "dest=/etc/init.d/unbound regexp='{{ item.regexp }}' replace='{{ item.replace }}' backup=yes"
   with_items:
     - { regexp: "^UNBOUND_CONF=/etc/unbound/unbound.conf", replace: "UNBOUND_CONF=/var/lib/unbound/etc/unbound/unbound.conf" }
 ## this is improperly set before config path is given, not compatible with chroot used
@@ -19,17 +25,27 @@
     - /var/lib/unbound/var/run
     - /var/lib/unbound/var/log
 
-- stat: path=/var/lib/unbound/etc/unbound
+- name: Check chroot etc path exists
+  stat: path=/var/lib/unbound/etc/unbound
   register: st1
 - command: mv /etc/unbound /var/lib/unbound/etc/
   when: not st1.stat.exists
-- stat: path=/etc/unbound
+- name: Check if non-chroot etc path exists
+  stat: path=/etc/unbound
   register: st2
-- stat: path=/var/run/unbound.pid
+- name: Check if non-chroot run path exists
+  stat: path=/var/run/unbound.pid
   register: st3
-- file: src=/var/lib/unbound/etc/unbound dest=/etc/unbound owner=root group=root state=link
+- name: Mapped non-chroot etc path to chroot etc path
+  file: src=/var/lib/unbound/etc/unbound dest=/etc/unbound owner=root group=root state=link
   when: st2.stat.islnk is not defined
-- file: src=/var/lib/unbound/var/run/unbound.pid dest=/var/run/unbound.pid owner=root group=root state=link force=yes
+- name: Mapped non-chroot run path to chroot etc path
+  file:
+    src: /var/lib/unbound/var/run/unbound.pid
+    dest: /var/run/unbound.pid
+    owner: root
+    group: root
+    state: link
+    force: yes
   when: st3.stat.islnk is not defined
   notify: restart unbound
-

@@ -1,9 +1,10 @@
 ---
 - name: restart unbound
   service: name=unbound state=restarted
-  when: (unbound_service_enabled == 'yes' or unbound_service_enabled == true) and not (ansible_virtualization_type is defined and ansible_virtualization_type == "docker")
+  when: >
+    (unbound_service_enabled == 'yes' or unbound_service_enabled) and
+    not (ansible_virtualization_type is defined and ansible_virtualization_type == "docker")
 
 - name: reload unbound
   service: name=unbound state=reloaded
-  when: unbound_service_enabled == 'yes' or unbound_service_enabled == true
-
+  when: unbound_service_enabled == 'yes' or unbound_service_enabled
