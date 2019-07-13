@@ -58,8 +58,8 @@ unbound_forward_zone:
    - 8.8.8.8 #Google DNS 1
    - 8.8.4.4 #Google DNS 2
 
-# Package states: installed or latest
-unbound_pkg_state: installed
+# Package states: present or latest
+unbound_pkg_state: present
 
 # Service states: started or stopped
 unbound_service_state: started
