@@ -1,4 +1,4 @@
-# {{ ansible_managed }}
+{{ ansible_managed | comment }}
 
 {% set local_zone_type = item.local_zone_type | default(unbound_local_zone) %}
 {% set domains_with_reverses = item.domains_with_reverses | default(unbound_domains_with_reverses) %}
