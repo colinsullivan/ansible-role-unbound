@@ -18,9 +18,9 @@
   register: havescript
 - name: download domains feed script
   get_url:
-    url: https://github.com/juju4/DNS-Unbound-Blocklist-Downloader/raw/master/dns-unbound-blocklist-downloader.py
+    url: "{% if ansible_python_interpreter == 'python3' %}https://github.com/juju4/DNS-Unbound-Blocklist-Downloader/raw/master/dns-unbound-blocklist-downloader.py{% else %}https://raw.githubusercontent.com/juju4/DNS-Unbound-Blocklist-Downloader/3782d61dab1ca44b95327ea89319a91189e67960/dns-unbound-blocklist-downloader.py{% endif %}"
     dest: "{{ scriptsdir }}/dns-unbound-blocklist-downloader.py"
-    checksum: sha256:12ff8e1b08f49109b483c8789f48c766ccd65c852380dcc6434b31478d62f07b
+    checksum: "{% if ansible_python_interpreter == 'python3' %}sha256:12ff8e1b08f49109b483c8789f48c766ccd65c852380dcc6434b31478d62f07b{% else %}1582b5301a6e0b13b6f93555b7f2452b6f3cc38d625cc471cbdbbf7a314ab0f7{% endif %}"
     mode: 0755
   when: not havescript.stat.exists
 
