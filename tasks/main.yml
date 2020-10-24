@@ -85,7 +85,7 @@
     backup: yes'
   when: >
     ansible_os_family == "RedHat"
-    and ansible_default_ipv4 is defined and ansible_default_ipv4 != ''
+    and ansible_default_ipv4 is defined and ansible_default_ipv4|string
 
 - name: Redhat | Update current resolv.conf
   lineinfile:

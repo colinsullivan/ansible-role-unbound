@@ -1,5 +1,6 @@
 ---
 galaxy_info:
+  role_name: unbound
   author: "DAUPHANT Julien"
   description: Unbound DNS Server and resolver
   license: BSD

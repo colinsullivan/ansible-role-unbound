@@ -9,7 +9,7 @@
 
 - name: Ensure script directory exists
   file:
-    dest: "{{ scriptsdir }}"
+    dest: "{{ scriptsdir }}"
     mode: '0755'
     state: directory
 
