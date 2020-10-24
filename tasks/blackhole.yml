@@ -38,7 +38,7 @@
 
 - name: run blackhole feed script first time
   command: >
-    python {{ scriptsdir }}/dns-unbound-blocklist-downloader.py
+    {{ ansible_python_interpreter }} {{ scriptsdir }}/dns-unbound-blocklist-downloader.py
   args:
     creates: /etc/unbound/conf.d/80local-blocking-data.conf
   notify: restart unbound
