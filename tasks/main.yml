@@ -17,6 +17,12 @@
   notify: restart unbound
   tags: ["configuration", "unbound"]
 
+- debug: var=unbound_configuration
+- debug:
+    msg: "{{ unbound_configuration[0] }}"
+- debug:
+    msg: "{{ unbound_configuration[0].keys() }}"
+
 - name: configure add independant config file
   template:
     src: "{{ item }}.j2"
