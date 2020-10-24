@@ -56,6 +56,7 @@ script:
 
   - 'sudo docker exec --tty "$(cat ${container_id})" env TERM=xterm pip install ansible==${ansible_version}'
   - 'sudo docker exec --tty "$(cat ${container_id})" env TERM=xterm ansible --version'
+  - 'sudo docker exec --tty "$(cat ${container_id})" env TERM=xterm ansible --connection=local -m setup localhost'
 
   # Ansible syntax check.
   - 'sudo docker exec --tty "$(cat ${container_id})" env TERM=xterm ansible-playbook /etc/ansible/roles/jdauphant.unbound/test/integration/default/default.yml --syntax-check'
