@@ -82,7 +82,7 @@
     dest: "/etc/sysconfig/network-scripts/ifcfg-{{ ansible_default_ipv4.interface }}"
     regexp: '^DNS1=127.0.0.1'
     line: 'DNS1=127.0.0.1'
-    backup: yes'
+    backup: yes
   when: >
     ansible_os_family == "RedHat"
     and ansible_default_ipv4 is defined and ansible_default_ipv4|string
