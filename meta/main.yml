@@ -7,8 +7,8 @@ galaxy_info:
   platforms:
    - name: EL
      versions:
-      - 5
-      - 6
+      - 7
+      - 8
    - name: Fedora
      versions:
       - 16
@@ -16,11 +16,9 @@ galaxy_info:
       - 18
    - name: Ubuntu
      versions:
-      - precise
-      - quantal
-      - raring
-      - saucy
-      - trusty
+      - xenial
+      - bionic
+      - focal
   galaxy_tags:
    - networking
    - system
