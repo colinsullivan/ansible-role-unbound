@@ -2,7 +2,7 @@
 
 server:
 {% for config in unbound_configuration %}
-    {{ config.keys().0 }}: {{ config.values().0 }}
+    {{ config.keys() | list | first }}: {{ config.values() | list | first }}
 {% endfor %}
 {% if unbound_anchor_enabled %}
     auto-trust-anchor-file: "{{unbound_anchorfile}}"
