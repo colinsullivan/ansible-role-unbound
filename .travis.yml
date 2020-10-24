@@ -77,11 +77,13 @@ script:
 #  - 'sudo docker exec --tty "$(cat ${container_id})" /etc/ansible/roles/jdauphant.unbound/test/integration/default/serverspec/run-local-tests.sh'
 
 after_failure:
-  - 'docker exec "$(cat ${container_id})" head -50 /etc/unbound/conf.d/80local-blocking-data.conf'
-  - 'docker exec --tty "$(cat ${container_id})" env TERM=xterm systemctl -l --no-pager status unbound.service'
   - 'docker exec --tty "$(cat ${container_id})" env TERM=xterm journalctl -xe --no-pager'
 
 after_script:
+  - 'docker exec "$(cat ${container_id})" cat /etc/unbound/conf.d/01general.conf'
+  - 'docker exec "$(cat ${container_id})" cat /etc/unbound/conf.d/99forward_zone.conf'
+  - 'docker exec "$(cat ${container_id})" head -50 /etc/unbound/conf.d/80local-blocking-data.conf'
+  - 'docker exec --tty "$(cat ${container_id})" env TERM=xterm systemctl -l --no-pager status unbound.service'
   # Clean up
   - 'sudo docker stop "$(cat ${container_id})"'
 
