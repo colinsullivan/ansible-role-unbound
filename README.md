@@ -1,5 +1,5 @@
-[![Build Status - Master](https://travis-ci.org/juju4/ansible-role-unbound.svg?branch=master)](https://travis-ci.org/juju4/ansible-role-unbound)
-[![Build Status - Devel](https://travis-ci.org/juju4/ansible-role-unbound.svg?branch=devel)](https://travis-ci.org/juju4/ansible-role-unbound/branches)
+[![Build Status - Master](https://travis-ci.com/juju4/ansible-role-unbound.svg?branch=master)](https://travis-ci.com/juju4/ansible-role-unbound)
+[![Build Status - Devel](https://travis-ci.com/juju4/ansible-role-unbound.svg?branch=devel)](https://travis-ci.com/juju4/ansible-role-unbound/branches)
 ansible-role-unbound
 ====================
 
